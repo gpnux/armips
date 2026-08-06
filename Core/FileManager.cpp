@@ -160,6 +160,14 @@ bool GenericAssemblerFile::write(void* data, size_t length)
 {
 	if (!isOpen())
 		return false;
+	int64_t physicalAddress = getPhysicalAddress();
+	if (physicalAddressLimit >= 0 &&
+		(physicalAddress > physicalAddressLimit ||
+		 length > uint64_t(physicalAddressLimit - physicalAddress)))
+	{
+		Logger::queueError(Logger::Error, "Write crosses ROM bank boundary");
+		return false;
+	}
 
 	stream.write(reinterpret_cast<const char *>( data ), length);
 	virtualAddress += length;
@@ -178,6 +186,11 @@ bool GenericAssemblerFile::seekVirtual(int64_t virtualAddress)
 
 	this->virtualAddress = virtualAddress;
 	int64_t physicalAddress = virtualAddress-headerSize;
+	if (physicalAddressLimit >= 0 && physicalAddress > physicalAddressLimit)
+	{
+		Logger::queueError(Logger::Error, "Write crosses ROM bank boundary");
+		return false;
+	}
 
 	if (isOpen())
 		stream.seekp(physicalAddress);

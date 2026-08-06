@@ -1,0 +1,1 @@
+BankBoundary.asm(6) error: Write crosses ROM bank boundary

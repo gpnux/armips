@@ -58,6 +58,7 @@ void CDirectiveFile::initCopy(const fs::path& inputName, const fs::path& outputN
 void CDirectiveFile::initClose()
 {
 	type = Type::Close;
+	closeArchitecture = &Architecture::current();
 	updateSection(++Global.Section);
 }
 
@@ -104,6 +105,8 @@ void CDirectiveFile::Encode() const
 		break;
 	case Type::Close:
 		g_fileManager->closeFile();
+		if (closeFile && closeArchitecture)
+			closeArchitecture->onFileClose(closeFile->getFileName());
 		break;
 	case Type::Invalid:
 		// TODO: Assert?
@@ -172,10 +175,12 @@ void CDirectivePosition::exec() const
 	switch (type)
 	{
 	case Physical:
+		if (auto file = std::dynamic_pointer_cast<GenericAssemblerFile>(g_fileManager->getOpenFile()))
+			file->clearPhysicalAddressLimit();
 		g_fileManager->seekPhysical(position);
 		break;
 	case Virtual:
-		g_fileManager->seekVirtual(position);
+		Architecture::current().seekVirtualAddress(position);
 		break;
 	}
 }

@@ -214,7 +214,7 @@ will assemble to this:
 
 A standard expression parser with operator precedence and bracket support has been implemented. It is intended to behave exactly like any C/C++ parser and supports all unary, binary and ternary operators of the C language. Every numeral argument can be given as an expression, including label names. However, some directives do not support variable addresses, so labels cannot be used in expressions for them. The following bases are supported:
 
-* `0xA` and `0Ah` for hexadecimal numbers
+* `0xA`, `0Ah`, and `$A` for hexadecimal numbers
 * `0o12` and `12o` for octal numbers
 * `1010b` and `0b1010` for binary numbers
 
@@ -481,12 +481,18 @@ These directives can be used to set the architecture that the following assembly
 | `.arm.little` | - | ARM | Output in little endian |
 | `.saturn` | SEGA Saturn | SuperH | - |
 | `.32x` | SEGA 32x | SuperH | Alias to `.saturn` |
+| `.z80` | - | Zilog Z80 | - |
+| `.sm83` | - | Sharp SM83 | - |
+| `.gb` | Game Boy | Sharp SM83 | Enables ROM banking and `.header` |
+| `.sms` | Master System | Zilog Z80 | Enables ROM banking and `.header` |
+| `.gg` | Game Gear | Zilog Z80 | Enables ROM banking and `.header` |
 
 | Architecture | Word size (in bits) |
 | ------------ |:---------------------|
 | MIPS | 32 |
 | ARM | 32 |
 | SuperH | 16 |
+| Z80/SM83 | 16 |
 
 ### Open a generic file
 
@@ -546,6 +552,37 @@ orga  FileAddress
 ```
 
 Sets the output pointer to the specified address. `.org`/`org` specifies a memory address, which is automatically converted to the file address for the current output file. `.orga`/`orga` directly specifies the absolute file address. This directive terminates the scope for local labels and `equ`s.
+
+### Select a ROM bank
+
+```
+.bank BankNumber
+```
+
+Selects a 16 KiB ROM bank for subsequent `.org` directives when `.gb`, `.sms`, or `.gg` is active. For bank 0 the Game Boy address range is `0x0000`-`0x3FFF`; other Game Boy banks use `0x4000`-`0x7FFF`. Master System and Game Gear addresses may use any ROM window from `0x0000` through `0xBFFF`. Writes may not cross a bank boundary.
+
+Use `.orga` when a physical ROM offset is clearer or when extending a ROM. There is no separate expansion directive; writing the final byte establishes the new size:
+
+```
+.orga 0xFFFFF
+.db 0
+```
+
+### Verify input bytes
+
+```
+.expect Value[,Value...]
+```
+
+Checks that the original input file contains the specified byte values at the current output position. A failed check stops assembly, which prevents a patch from being applied to an incompatible ROM. `.expect` does not write data and does not advance the output position.
+
+### Update a cartridge header
+
+```
+.header
+```
+
+Requests platform header updates when the current file is closed. With `.gb`, armips updates the ROM size byte, header checksum, and global checksum. With `.sms` or `.gg`, it updates the ROM size code and SEGA checksum. The ROM must already have its final size and a valid platform header; `.header` does not expand the ROM or configure a cartridge mapper.
 
 ### Change the header size
 
@@ -1181,6 +1218,8 @@ will align the memory address to a multiple of 4, then create a label named `Mai
 ## 7.1 Change log
 
 * Current Development Version
+    * added Z80 and Sharp SM83 instruction support
+    * added `.gb`, `.sms`, and `.gg` platform modes with `.bank`, `.expect`, and `.header`
     * *BREAKING* changes to PSP VFPU instruction parsing
       * fixed transposed matrix register encoding (e.g. `vmidt.p E220` was assembling to `vmidt.p E202`)
       * renamed `vuc2i.s` to [`vuc2ifs.s`](https://pspdev.github.io/vfpu-docs/#vuc2ifs.s)
@@ -1303,7 +1342,6 @@ will align the memory address to a multiple of 4, then create a label named `Mai
 There are several changes after version 0.7d that may break compatibility with code written for older versions. These are as follows:
 
 * String literals now require quotation marks, e.g. for file names
-* `$XX` is no longer supported for hexadecimal literals
 
 ## 7.3 License
 

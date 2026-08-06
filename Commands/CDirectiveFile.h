@@ -6,6 +6,7 @@
 #include "Util/FileSystem.h"
 
 class AssemblerFile;
+class Architecture;
 class GenericAssemblerFile;
 
 class CDirectiveFile: public CAssemblerCommand
@@ -28,6 +29,7 @@ private:
 	int64_t virtualAddress;
 	std::shared_ptr<GenericAssemblerFile> file;
 	std::shared_ptr<AssemblerFile> closeFile;
+	Architecture* closeArchitecture = nullptr;
 };
 
 class CDirectivePosition: public CAssemblerCommand

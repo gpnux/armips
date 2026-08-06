@@ -27,6 +27,11 @@ void Architecture::registerExpressionFunctions([[maybe_unused]] ExpressionFuncti
 {
 }
 
+bool Architecture::seekVirtualAddress(int64_t address)
+{
+	return g_fileManager->seekVirtual(address);
+}
+
 ArchitectureCommand::ArchitectureCommand(const std::string& tempText, const std::string& symText)
 	: tempText(tempText), symText(symText)
 {
@@ -44,6 +49,7 @@ bool ArchitectureCommand::Validate(const ValidateState &state)
 
 void ArchitectureCommand::Encode() const
 {
+	Architecture::setCurrent(*architecture);
 	g_fileManager->setEndianness(endianness);
 }
 

@@ -1,0 +1,1 @@
+ExpectFailure.asm(6) error: .expect failed at ROM offset 0x1

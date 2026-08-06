@@ -3,6 +3,10 @@
 #include "Core/ExpressionFunctionHandler.h"
 #include "Parser/Tokenizer.h"
 
+#include <algorithm>
+#include <cctype>
+#include <stdexcept>
+
 static std::unique_ptr<ExpressionInternal> expression(Tokenizer& tokenizer);
 
 static std::unique_ptr<ExpressionInternal> primaryExpression(Tokenizer& tokenizer)
@@ -29,6 +33,40 @@ static std::unique_ptr<ExpressionInternal> primaryExpression(Tokenizer& tokenize
 	case TokenType::Integer:
 		tokenizer.eatToken();
 		return std::make_unique<ExpressionInternal>(tok.intValue());
+	case TokenType::Dollar:
+		{
+			size_t line = tok.line;
+			size_t column = tok.column + tok.getOriginalText().size();
+			tokenizer.eatToken();
+			std::string text;
+			while (true)
+			{
+				const Token& digits = tokenizer.peekToken();
+				if (digits.line != line || digits.column != column ||
+					(digits.type != TokenType::Invalid && digits.type != TokenType::Integer &&
+					 digits.type != TokenType::Float &&
+					 digits.type != TokenType::Identifier && digits.type != TokenType::NumberString))
+					break;
+				std::string part = digits.getOriginalText();
+				if (part.empty() || !std::all_of(part.begin(), part.end(), [](unsigned char character) {
+					return std::isxdigit(character) != 0;
+				}))
+					break;
+				text += part;
+				column += part.size();
+				tokenizer.eatToken();
+			}
+			if (text.empty())
+				return nullptr;
+			try
+			{
+				return std::make_unique<ExpressionInternal>(int64_t(std::stoull(text, nullptr, 16)));
+			}
+			catch (const std::out_of_range&)
+			{
+				return nullptr;
+			}
+		}
 	case TokenType::LParen:
 		{
 			tokenizer.eatToken();

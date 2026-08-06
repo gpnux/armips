@@ -3,6 +3,7 @@
 #include "Archs/ARM/Arm.h"
 #include "Archs/MIPS/Mips.h"
 #include "Archs/SuperH/SuperH.h"
+#include "Archs/Z80/Z80.h"
 #include "Commands/CAssemblerLabel.h"
 #include "Commands/CDirectiveArea.h"
 #include "Commands/CDirectiveConditional.h"
@@ -477,6 +478,37 @@ std::unique_ptr<CAssemblerCommand> parseDirectiveShArch(Parser& parser, int flag
 	return nullptr;
 }
 
+std::unique_ptr<CAssemblerCommand> parseDirectiveZ80Arch(Parser& parser, int flags)
+{
+	Architecture::setCurrent(Z80);
+
+	switch (flags)
+	{
+	case DIRECTIVE_Z80_STANDARD:
+		Z80.setMode(Z80Mode::Standard);
+		Z80.setPlatform(Z80Platform::None);
+		return std::make_unique<CZ80ArchitectureCommand>(".z80", Z80Mode::Standard, Z80Platform::None);
+	case DIRECTIVE_Z80_SM83:
+		Z80.setMode(Z80Mode::Sm83);
+		Z80.setPlatform(Z80Platform::None);
+		return std::make_unique<CZ80ArchitectureCommand>(".sm83", Z80Mode::Sm83, Z80Platform::None);
+	case DIRECTIVE_Z80_SMS:
+		Z80.setMode(Z80Mode::Standard);
+		Z80.setPlatform(Z80Platform::Sms);
+		return std::make_unique<CZ80ArchitectureCommand>(".sms", Z80Mode::Standard, Z80Platform::Sms);
+	case DIRECTIVE_Z80_GG:
+		Z80.setMode(Z80Mode::Standard);
+		Z80.setPlatform(Z80Platform::GameGear);
+		return std::make_unique<CZ80ArchitectureCommand>(".gg", Z80Mode::Standard, Z80Platform::GameGear);
+	case DIRECTIVE_Z80_GB:
+		Z80.setMode(Z80Mode::Sm83);
+		Z80.setPlatform(Z80Platform::GameBoy);
+		return std::make_unique<CZ80ArchitectureCommand>(".gb", Z80Mode::Sm83, Z80Platform::GameBoy);
+	}
+
+	return nullptr;
+}
+
 std::unique_ptr<CAssemblerCommand> parseDirectiveArea(Parser& parser, int flags)
 {
 	std::vector<Expression> parameters;
@@ -828,6 +860,12 @@ const DirectiveMap directives = {
 
 	{ ".saturn",          { &parseDirectiveShArch,          DIRECTIVE_SH_SATURN } },
 	{ ".32x",             { &parseDirectiveShArch,          DIRECTIVE_SH_SATURN } },
+
+	{ ".z80",             { &parseDirectiveZ80Arch,         DIRECTIVE_Z80_STANDARD } },
+	{ ".sm83",            { &parseDirectiveZ80Arch,         DIRECTIVE_Z80_SM83 } },
+	{ ".gb",              { &parseDirectiveZ80Arch,         DIRECTIVE_Z80_GB } },
+	{ ".sms",             { &parseDirectiveZ80Arch,         DIRECTIVE_Z80_SMS } },
+	{ ".gg",              { &parseDirectiveZ80Arch,         DIRECTIVE_Z80_GG } },
 
 	{ ".area",            { &parseDirectiveArea,            0 } },
 	{ ".autoregion",      { &parseDirectiveAutoRegion,      0 } },

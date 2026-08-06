@@ -6,6 +6,7 @@
 #include "Archs/MIPS/MipsExpressionFunctions.h"
 #include "Archs/SuperH/SuperH.h"
 #include "Archs/SuperH/ShExpressionFunctions.h"
+#include "Archs/Z80/Z80.h"
 #include "Commands/CAssemblerCommand.h"
 #include "Core/Allocations.h"
 #include "Core/Common.h"
@@ -24,6 +25,7 @@ bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symD
 	Arm.Pass2();
 	Mips.Pass2();
 	SuperH.Pass2();
+	Z80.Pass2();
 
 	ValidateState validation;
 	do	// loop until everything is constant
@@ -53,6 +55,7 @@ bool encodeAssembly(std::unique_ptr<CAssemblerCommand> content, SymbolData& symD
 		Arm.Revalidate();
 		Mips.Revalidate();
 		SuperH.Revalidate();
+		Z80.Revalidate();
 
 		if (Global.memoryMode)
 			g_fileManager->closeFile();
@@ -163,6 +166,7 @@ bool runArmips(ArmipsArguments& settings)
 	Global.FileInfo.FileNum = 0;
 
 	Arm.clear();
+	Z80.clear();
 
 	ExpressionFunctionHandler::instance().reset();
 	registerExpressionFunctions(ExpressionFunctionHandler::instance());

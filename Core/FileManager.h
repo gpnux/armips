@@ -52,6 +52,8 @@ public:
 	const fs::path& getOriginalFileName() { return originalName; };
 	int64_t getOriginalHeaderSize() { return originalHeaderSize; };
 	void setHeaderSize(int64_t size) { headerSize = size; };
+	void setPhysicalAddressLimit(int64_t end) { physicalAddressLimit = end; };
+	void clearPhysicalAddressLimit() { physicalAddressLimit = -1; };
 
 private:
 	enum Mode { Open, Create, Copy };
@@ -60,6 +62,7 @@ private:
 	int64_t originalHeaderSize;
 	int64_t headerSize;
 	int64_t virtualAddress;
+	int64_t physicalAddressLimit = -1;
 	fs::ofstream stream;
 	fs::path fileName;
 	fs::path originalName;

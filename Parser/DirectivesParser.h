@@ -75,6 +75,12 @@ using DirectiveMap = std::unordered_multimap<std::string, const DirectiveEntry>;
 
 #define DIRECTIVE_SH_SATURN			0x00000001
 
+#define DIRECTIVE_Z80_STANDARD		0x00000001
+#define DIRECTIVE_Z80_SM83			0x00000002
+#define DIRECTIVE_Z80_SMS			0x00000003
+#define DIRECTIVE_Z80_GG			0x00000004
+#define DIRECTIVE_Z80_GB			0x00000005
+
 // Area directive flags
 #define DIRECTIVE_AREA_SHARED		0x00000001
 

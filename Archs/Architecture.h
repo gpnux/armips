@@ -2,6 +2,7 @@
 
 #include "Commands/CAssemblerCommand.h"
 #include "Util/ByteArray.h"
+#include "Util/FileSystem.h"
 
 #include <map>
 #include <memory>
@@ -23,6 +24,8 @@ public:
 	virtual void NextSection() = 0;
 	virtual void Pass2() = 0;
 	virtual void Revalidate() = 0;
+	virtual bool seekVirtualAddress(int64_t address);
+	virtual void onFileClose(const fs::path& fileName) { }
 	virtual std::unique_ptr<IElfRelocator> getElfRelocator() = 0;
 	virtual Endianness getEndianness() = 0;
 	virtual int getWordSize() = 0;
